@@ -1158,7 +1158,10 @@ export default function Page() {
   const onFile = (file: File | undefined) => {
     if (!file) return;
     const reader = new FileReader(); // reads the file locally; nothing is uploaded
-    reader.onload = () => setRaw(String(reader.result ?? ""));
+    reader.onload = () => {
+      resetMarks();
+      setRaw(String(reader.result ?? ""));
+    };
     reader.readAsText(file);
   };
 
@@ -1173,13 +1176,23 @@ export default function Page() {
     }
   };
 
-  const clearAll = () => {
-    setRaw("");
+  // Forget per-chat marks (message ids restart for every new chat)
+  const resetMarks = () => {
     setDone(new Set());
     setOpen(new Set());
-    setShowFyi(false);
     setLater(new Set());
+    setShowFyi(false);
     setTriageQueue(null);
+    setJump(null);
+    setFlash(null);
+  };
+
+  const clearAll = () => {
+    setRaw("");
+    setName("");
+    setLastN("all");
+    setCopied(false);
+    resetMarks();
   };
 
   const triageCandidates = analysis
@@ -1241,10 +1254,10 @@ export default function Page() {
               <button
                 type="button"
                 onClick={() => {
+                  resetMarks();
                   setRaw(buildSample());
                   setName("Priya");
-                  setDone(new Set());
-                  setOpen(new Set());
+                  setLastN("all");
                 }}
                 className={`bg-[#101820] px-3 py-1.5 font-medium text-white hover:bg-[#25323E] ${focusRing}`}
               >
